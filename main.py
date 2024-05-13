@@ -80,9 +80,9 @@ def run_infer_script(
         embedder_model,
         upscale_audio,
     )
-    return f"File {input_path} inferred successfully.", output_path.replace(
-        ".wav", f".{export_format.lower()}"
-    )
+    # return f"File {input_path} inferred successfully.", output_path.replace(
+    #     ".wav", f".{export_format.lower()}"
+    # )
 
 
 # Batch infer
