@@ -112,7 +112,7 @@ def run_batch_infer_script(
     audio_files = [
         f for f in os.listdir(input_folder) if f.endswith((".mp3", ".wav", ".flac"))
     ]
-    print(f"Detected {len(audio_files)} audio files for inference.")
+    # print(f"Detected {len(audio_files)} audio files for inference.")
 
     for audio_file in audio_files:
         if "_output" in audio_file:
