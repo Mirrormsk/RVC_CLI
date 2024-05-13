@@ -29,3 +29,4 @@ venv/
 # Ignore specific project directories
 /tracks/
 /lyrics/
+.env

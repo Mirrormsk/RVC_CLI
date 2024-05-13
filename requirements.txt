@@ -1,7 +1,7 @@
 # General dependencies
 beautifulsoup4
 ffmpeg-python>=0.2.0
-numpy==1.23.5
+numpy==1.26.4
 requests==2.31.0
 tqdm
 wget
@@ -9,6 +9,10 @@ six>=1.16
 samplerate==0.1.0
 pyyaml
 ml_collections
+
+#api reqs
+pydantic
+boto3
 
 # Audio processing
 faiss-cpu==1.7.3
@@ -41,8 +45,8 @@ torchvision==0.16.1
 einops
 local-attention
 onnx>=1.14
-onnxruntime
-onnxruntime_gpu==1.15.1
+# onnxruntime
+# onnxruntime_gpu==1.15.1
 
 # Visualization
 matplotlib==3.7.2
