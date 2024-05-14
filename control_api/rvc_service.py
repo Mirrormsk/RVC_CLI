@@ -1,23 +1,44 @@
+import logging
+import os
 import subprocess
 
 from typing import List
 
+from control_api.aws import AWSService
+
+logger = logging.getLogger(__name__)
+
 
 class RVCService:
 
-    # def __init__(self, logs_dir: str):
-    #     self.logs_dir = logs_dir
+    def __init__(self, source_save_path: str, logs_dir: str = '../logs'):
+        self.source_save_path = source_save_path
+        self.logs_dir = logs_dir
+        self.batch_size = os.getenv('BATCH_SIZE', 6)
+
+        if not os.path.exists(self.source_save_path):
+            os.makedirs(self.source_save_path)
+
+    def retrieve_command(self, command_data: dict):
+
+        if 'command' not in command_data:
+            logger.warning(f'No command specified: {command_data}')
+
+        command = command_data['command']
+
+        if command == 'training':
+            return self.run_training(
+                model_name=command_data['model_name'],
+                source_aws_url=command_data['source_aws_url']
+            )
+        else:
+            logger.warning(f'Unknown command: {command}')
+            return None
 
     @staticmethod
-    def run_command(command: List[str]):
+    def run_process(command: List[str]):
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-        stdout, stderr = process.communicate()
-
-        if process.returncode != 0:
-            print(f"Finished with error {stderr.decode()}")
-        else:
-            print(f"Finished success: {stdout.decode()}")
+        return process
 
     def prepare_source(self, dataset_path: str, model_name: str, sampling_rate: int = 40000, ):
 
@@ -30,7 +51,7 @@ class RVCService:
             "--sampling_rate", sampling_rate
         ]
 
-        return self.run_command(command)
+        return self.run_process(command)
 
     def run_extract_features_command(self, model_name: str, rvc_version: str = 'v2', f0method: str = "rmvpe", hop_length: int = 128,
                          sampling_rate: int = 40000):
@@ -44,12 +65,11 @@ class RVCService:
             "--hop_length", hop_length,
             "--sampling_rate", sampling_rate
         ]
-        return self.run_command(command)
+        return self.run_process(command)
 
     def run_start_training_command(self, model_name: str,
                                    batch_size: str,
-                                   g_pretrained: str,
-                                   d_pretrained: str,
+
                                    rvc_version: str = 'v2',
                                    save_every_epoch: int = 50,
                                    save_only_latest: bool = False,
@@ -62,7 +82,8 @@ class RVCService:
                                    overtraining_threshold: int = 50,
                                    pretrained: bool = True,
                                    custom_pretrained: bool = False,
-
+                                   g_pretrained: str = None,
+                                   d_pretrained: str = None,
                                    ):
         command = [
             "python",
@@ -87,7 +108,7 @@ class RVCService:
 
         ]
 
-        return self.run_command(command)
+        return self.run_process(command)
 
     def run_generate_index_file_command(self, model_name: str, rvc_version: str = 'v2'):
         command = [
@@ -98,16 +119,68 @@ class RVCService:
             "--rvc_version", rvc_version,
         ]
 
-        return self.run_command(command)
+        return self.run_process(command)
+
+    def run_training(self, model_name: str, source_aws_url: str):
+
+        dataset_save_path = os.path.join(self.source_save_path, model_name)
+        AWSService.download_file(source_aws_url, dataset_save_path)
+
+        if not os.path.exists(dataset_save_path):
+            os.makedirs(dataset_save_path)
+
+        #  Prepare
+        prepare_process = self.prepare_source(
+            dataset_path=dataset_save_path,
+            model_name=model_name,
+        )
+        return_code = prepare_process.wait()
+
+        if return_code != 0:
+            logger.error(f'Prepare process failed: {return_code}. Errors: {prepare_process.stderr.read()}')
+            return
+        else:
+            logger.info('Prepare process succeeded')
+
+        # Extract features
+        extract_features_process = self.run_extract_features_command(
+            model_name=model_name,
+        )
+
+        return_code = extract_features_process.wait()
+
+        if return_code != 0:
+            logger.error(f'Extract features process failed, stop execution. Errors: {prepare_process.stderr.read()}')
+            return
+        else:
+            logger.info('Extract features process succeeded')
+
+        # Start training
+        start_training_process = self.run_start_training_command(
+            model_name=model_name,
+            batch_size=self.batch_size,
+        )
+
+        return_code = start_training_process.wait()
+
+        if return_code != 0:
+            logger.error(
+                f'Start training process failed, stop execution. Errors: {prepare_process.stderr.read()}')
+            return
+        else:
+            logger.info('tart training process succeeded')
 
 
 if __name__ == '__main__':
-    rvc_service = RVCService()
+    rvc_service = RVCService(source_save_path='sources')
+
+
+
 
 # python3.8 trainset_preprocess_pipeline_print.py "/home/u57376/voice_sources/mellstroy2/" 40000 4 "/home/u57376/voice_project/RVC_new/logs/mi-test" False
 
 
-# компнда предтренировки источника python3 trainset_preprocess_pipeline_print.py "/Users/maxim/PycharmProjects/voice_emulation/voice_source/sobchak" 40000 6 "/Users/maxim/PycharmProjects/voice_emulation/logs/mi-test" False
+# команда предтренировки источника python3 trainset_preprocess_pipeline_print.py "/Users/maxim/PycharmProjects/voice_emulation/voice_source/sobchak" 40000 6 "/Users/maxim/PycharmProjects/voice_emulation/logs/mi-test" False
 
 
 # вытаскивание черт:   python3 extract_f0_print.py "/Users/maxim/PycharmProjects/voice_emulation/logs/mi-test" 6 pm
