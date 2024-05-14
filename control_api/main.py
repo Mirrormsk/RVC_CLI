@@ -1,8 +1,8 @@
 import json
 import os
 from dotenv import load_dotenv
-from control_api.rmq_config import channel
-from control_api.rvc_service import rvc_service
+from rmq_config import channel
+from rvc_service import rvc_service
 import logging
 
 
