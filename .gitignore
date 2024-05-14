@@ -28,3 +28,5 @@ venv/
 # Ignore specific project directories
 /tracks/
 /lyrics/
+control_api/.env
+.idea
