@@ -1,16 +1,15 @@
 import pika
 import os
 
-connection_params = pika.ConnectionParameters(
-    host=os.getenv("RABBITMQ_HOST", 'localhost'),
-    port=os.getenv("RABBITMQ_PORT", 5672),
-    virtual_host='/',
-    credentials=pika.PlainCredentials(
-        username=os.getenv("RABBITMQ_USER", 'guest'),  # Имя пользователя по умолчанию
-        password=os.getenv("RABBITMQ_PASS", 'guest')   # Пароль по умолчанию
-    )
-)
+from dotenv import load_dotenv
 
-connection = pika.BlockingConnection(connection_params)
+load_dotenv()
+
+RMQ_CONNECTION_URL = os.getenv("RMQ_CONNECTION_URL")
+
+
+rmq_parameters = pika.URLParameters(RMQ_CONNECTION_URL)
+connection = pika.BlockingConnection(rmq_parameters)
+
 
 channel = connection.channel()
