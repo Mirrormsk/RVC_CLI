@@ -171,8 +171,7 @@ class RVCService:
             logger.info('tart training process succeeded')
 
 
-if __name__ == '__main__':
-    rvc_service = RVCService(source_save_path='sources')
+rvc_service = RVCService(source_save_path='sources')
 
 
 
