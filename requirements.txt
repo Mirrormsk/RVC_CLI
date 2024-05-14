@@ -9,6 +9,7 @@ six>=1.16
 samplerate==0.1.0
 pyyaml
 ml_collections
+python-dotenv
 
 # Audio processing
 faiss-cpu==1.7.3
