@@ -3,11 +3,18 @@ from urllib.parse import urlparse
 import boto3
 from config import settings
 
+#
+# s3 = boto3.client(
+#     service_name='s3',
+#     endpoint_url='https://s3.ru-1.storage.selcloud.ru'
+# )
 
-s3 = boto3.client(
-    service_name='s3',
-    endpoint_url='https://s3.ru-1.storage.selcloud.ru'
+session = boto3.Session(
+    aws_access_key_id=settings.aws_access_key_id,
+    aws_secret_access_key=settings.aws_secret_access_key,
 )
+
+s3 = session.client('s3', endpoint_url='https://s3.ru-1.storage.selcloud.ru')
 
 
 class AWSService:
