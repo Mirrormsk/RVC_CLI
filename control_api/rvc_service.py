@@ -128,12 +128,15 @@ class RVCService:
         if not os.path.exists(dataset_save_path):
             os.makedirs(dataset_save_path)
 
+        print(f"Starting prepare process for model {model_name}")
+
         #  Prepare
         prepare_process = self.prepare_source(
             dataset_path=dataset_save_path,
             model_name=model_name,
         )
         return_code = prepare_process.wait()
+        print(f"Finished prepare process for model {model_name}")
 
         if return_code != 0:
             logger.error(f'Prepare process failed: {return_code}. Errors: {prepare_process.stderr.read()}')
@@ -142,12 +145,13 @@ class RVCService:
             logger.info('Prepare process succeeded')
 
         # Extract features
+        print(f"Starting extract features process for model {model_name}")
         extract_features_process = self.run_extract_features_command(
             model_name=model_name,
         )
 
         return_code = extract_features_process.wait()
-
+        print(f"Finished extract features process for model {model_name}")
         if return_code != 0:
             logger.error(f'Extract features process failed, stop execution. Errors: {prepare_process.stderr.read()}')
             return
