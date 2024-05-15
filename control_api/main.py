@@ -33,4 +33,5 @@ channel.basic_consume(
 if __name__ == '__main__':
 
     logger.info('Waiting for messages')
+    print('Waiting for messages')
     channel.start_consuming()
