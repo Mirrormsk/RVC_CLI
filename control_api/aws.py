@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 import boto3
 from config import settings
 
@@ -12,8 +14,10 @@ class AWSService:
 
     @staticmethod
     def download_file(file_s3_url: str, path_to_save: str):
+        parsed_url = urlparse(file_s3_url)
+        file_s3_key = parsed_url.path.lstrip('/')
+        get_object_response = s3.get_object(Bucket=settings.aws_storage_bucket_name, Key=file_s3_key)
 
-        get_object_response = s3.get_object(Bucket=settings.aws_storage_bucket_name, Key=file_s3_url)
         file_content = get_object_response['Body'].read()
 
         with open(path_to_save, 'wb') as file:

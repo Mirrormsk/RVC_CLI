@@ -5,7 +5,7 @@ import subprocess
 from typing import List
 
 from aws import AWSService
-
+from config import settings
 logger = logging.getLogger(__name__)
 
 

@@ -12,11 +12,11 @@ class AppSettings(BaseSettings):
     aws_s3_use_ssl: bool = Field(default=True, env='AWS_S3_USE_SSL')
     queue_name: str = Field(env='QUEUE_NAME')
     rmq_connection_url: str = Field(env='RMQ_CONNECTION_URL')
+    batch_size: str = Field(env='BATCH_SIZE', default=6)
 
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'
-
 
 
 settings = AppSettings()

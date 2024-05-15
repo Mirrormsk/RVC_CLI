@@ -1,14 +1,9 @@
 import pika
 import os
 
-from dotenv import load_dotenv
+from config import settings
 
-load_dotenv()
-
-RMQ_CONNECTION_URL = os.getenv("RMQ_CONNECTION_URL")
-
-
-rmq_parameters = pika.URLParameters(RMQ_CONNECTION_URL)
+rmq_parameters = pika.URLParameters(settings.rmq_connection_url)
 connection = pika.BlockingConnection(rmq_parameters)
 
 
