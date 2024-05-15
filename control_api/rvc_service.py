@@ -6,7 +6,10 @@ from typing import List
 
 from aws import AWSService
 from config import settings
+
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.INFO)
 
 
 class RVCService:
