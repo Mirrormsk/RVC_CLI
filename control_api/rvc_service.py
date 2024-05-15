@@ -8,8 +8,12 @@ from aws import AWSService
 from config import settings
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
 
 
 class RVCService:
@@ -134,12 +138,17 @@ class RVCService:
         print(f"Starting prepare process for model {model_name}")
 
         #  Prepare
-        prepare_process = self.prepare_source(
-            dataset_path=dataset_save_path,
-            model_name=model_name,
-        )
-        return_code = prepare_process.wait()
-        print(f"Finished prepare process for model {model_name}")
+        try:
+            prepare_process = self.prepare_source(
+                dataset_path=dataset_save_path,
+                model_name=model_name,
+            )
+            return_code = prepare_process.wait()
+        except Exception as e:
+            print(f"Error when prepare: {e}")
+        else:
+
+            print(f"Finished prepare process for model {model_name}")
 
         if return_code != 0:
             logger.error(f'Prepare process failed: {return_code}. Errors: {prepare_process.stderr.read()}')
