@@ -4,7 +4,7 @@ import subprocess
 
 from typing import List
 
-from control_api.aws import AWSService
+from aws import AWSService
 
 logger = logging.getLogger(__name__)
 
