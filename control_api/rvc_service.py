@@ -128,6 +128,7 @@ class RVCService:
         return self.run_process(command)
 
     def run_training(self, model_name: str, source_aws_url: str):
+        os.system('cd ..')
         dataset_save_path = os.path.join(self.source_save_path, model_name)
         AWSService.download_file(source_aws_url, dataset_save_path)
 
