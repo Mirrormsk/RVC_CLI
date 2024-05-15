@@ -48,7 +48,7 @@ class RVCService:
             "preprocess",
             "--model_name", model_name,
             "--dataset_path", dataset_path,
-            "--sampling_rate", sampling_rate
+            "--sampling_rate", str(sampling_rate)
         ]
 
         return self.run_process(command)
@@ -62,8 +62,8 @@ class RVCService:
             "--model_name", model_name,
             "--rvc_version", rvc_version,
             "--f0method", f0method,
-            "--hop_length", hop_length,
-            "--sampling_rate", sampling_rate
+            "--hop_length", str(hop_length),
+            "--sampling_rate", str(sampling_rate)
         ]
         return self.run_process(command)
 
@@ -91,21 +91,20 @@ class RVCService:
             "train",
             "--model_name", model_name,
             "--rvc_version", rvc_version,
-            "--save_every_epoch", save_every_epoch,
+            "--save_every_epoch", str(save_every_epoch),
             "--save_only_latest", save_only_latest,
             "--save_every_weights", save_every_weights,
-            "--total_epoch", total_epoch,
-            "--sampling_rate", sampling_rate,
+            "--total_epoch", str(total_epoch),
+            "--sampling_rate", str(sampling_rate),
             "--batch_size", batch_size,
-            "--gpu", gpu,
+            "--gpu", str(gpu),
             "--pitch_guidance", pitch_guidance,
             "--overtraining_detector", overtraining_detector,
-            "--overtraining_threshold", overtraining_threshold,
+            "--overtraining_threshold", str(overtraining_threshold),
             "--pretrained", pretrained,
             "--custom_pretrained", custom_pretrained,
             "--g_pretrained", g_pretrained,
             "--d_pretrained", d_pretrained,
-
         ]
 
         return self.run_process(command)
