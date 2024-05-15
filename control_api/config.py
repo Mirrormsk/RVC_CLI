@@ -1,4 +1,5 @@
-from pydantic import BaseModel, BaseSettings, Field
+from pydantic_settings import BaseSettings
+from pydantic import Field
 from typing import Optional, Dict, Any
 
 
