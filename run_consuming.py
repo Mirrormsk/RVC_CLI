@@ -28,19 +28,11 @@ def main():
     connection, channel = create_channel()
 
     channel.basic_consume(queue=settings.queue_name, on_message_callback=callback, auto_ack=True)
+    logger.info('Waiting for messages')
 
-    try:
-        logger.info('Waiting for messages')
-        channel.start_consuming()
-    except KeyboardInterrupt:
-        channel.stop_consuming()
-    except pika.exceptions.StreamLostError as e:
-        logger.error(f'StreamLostError: {e}, retrying...')
-        main()
-    finally:
-        connection.close()
+    channel.start_consuming()
 
 
 if __name__ == '__main__':
-    main()
 
+    main()
