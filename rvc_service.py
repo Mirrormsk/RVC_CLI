@@ -12,7 +12,7 @@ logger.setLevel(logging.INFO)
 
 
 class RVCService:
-    def __init__(self, source_save_path: str, logs_dir: str = '../logs'):
+    def __init__(self, source_save_path: str, logs_dir: str = 'logs'):
         self.source_save_path = source_save_path
         self.logs_dir = logs_dir
         self.batch_size = os.getenv('BATCH_SIZE', 6)
@@ -130,10 +130,14 @@ class RVCService:
     def run_training(self, model_name: str, source_aws_url: str):
 
         dataset_save_path = os.path.join(self.source_save_path, model_name)
-        AWSService.download_file(source_aws_url, dataset_save_path)
+        filename = source_aws_url.rsplit('/', maxsplit=1)[-1]
+        full_path = os.path.join(dataset_save_path, filename)
+        print(f"Full path: {full_path}")
 
         if not os.path.exists(dataset_save_path):
             os.makedirs(dataset_save_path)
+
+        AWSService.download_file(source_aws_url, full_path)
 
         print(f"Starting prepare process for model {model_name}")
 
