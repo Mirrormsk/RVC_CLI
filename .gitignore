@@ -30,3 +30,4 @@ venv/
 /lyrics/
 control_api/.env
 .idea
+.vscode
