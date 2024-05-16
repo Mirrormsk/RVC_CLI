@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def send_acknowledgment(properties):
-    connection = pika.BlockingConnection(pika.URLParameters(os.getenv('RABBITMQ_URL')))
+    connection = pika.BlockingConnection(pika.URLParameters(settings.rmq_connection_url))
     ack_channel = connection.channel()
     ack_queue_name = properties.reply_to
 
