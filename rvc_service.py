@@ -14,11 +14,13 @@ logger.setLevel(logging.INFO)
 class RVCService:
     def __init__(self, source_save_path: str, logs_dir: str = 'logs'):
         self.source_save_path = source_save_path
+        self.files_for_process_dir = 'files'
         self.logs_dir = logs_dir
-        self.batch_size = os.getenv('BATCH_SIZE', 6)
+        self.batch_size = settings.batch_size
 
-        if not os.path.exists(self.source_save_path):
-            os.makedirs(self.source_save_path)
+        for path in (self.files_for_process_dir, self.source_save_path):
+            if not os.path.exists(path):
+                os.makedirs(path)
 
     def retrieve_command(self, command_data: dict):
 
@@ -129,12 +131,28 @@ class RVCService:
         ]
         return self.run_process(command)
 
+    def run_infer_command(self, model_name: str, input_path: str, output_path: str,
+                          pth_path: str, index_path: str, export_format: str = 'WAV'):
+        command = [
+            "python",
+            "main.py",
+            "index",
+            "--model_name", model_name,
+            "--input_path", input_path,
+            "--output_path", output_path,
+            "--pth_path", pth_path,
+            "--index_path", index_path,
+            "--export_format", export_format,
+
+        ]
+        return self.run_process(command)
+
+
     def run_training(self, model_name: str, source_aws_url: str, total_epoch: int):
 
         dataset_save_path = os.path.join(self.source_save_path, model_name)
         filename = source_aws_url.rsplit('/', maxsplit=1)[-1]
         full_path = os.path.join(dataset_save_path, filename)
-
 
         if not os.path.exists(dataset_save_path):
             os.makedirs(dataset_save_path)
@@ -182,6 +200,15 @@ class RVCService:
             return
         else:
             logger.info('Start training process succeeded')
+
+        logger.info(f"Training task finished! Listen for new messages")
+
+    def run_infer(self, model_name: str, file_aws_url: str):
+        filename = file_aws_url.rsplit('/', maxsplit=1)[-1]
+        full_path = os.path.join(self.files_for_process_dir, filename)
+
+        AWSService.download_file(file_aws_url, full_path)
+
 
 
 rvc_service = RVCService(source_save_path='sources')
