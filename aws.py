@@ -1,3 +1,4 @@
+import os
 from urllib.parse import urlparse
 
 import boto3
@@ -28,6 +29,9 @@ class AWSService:
 
         file_content = get_object_response['Body'].read()
 
+        os.makedirs(os.path.dirname(path_to_save), exist_ok=True)
+
         with open(path_to_save, 'wb') as file:
             file.write(file_content)
 
+        print(f"File saved to {path_to_save}")
