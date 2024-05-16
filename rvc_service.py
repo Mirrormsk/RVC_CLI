@@ -21,6 +21,7 @@ class RVCService:
             os.makedirs(self.source_save_path)
 
     def retrieve_command(self, command_data: dict):
+
         if 'command' not in command_data:
             logger.warning(f'No command specified: {command_data}')
             return None
@@ -30,7 +31,8 @@ class RVCService:
         if command == 'training':
             return self.run_training(
                 model_name=command_data['model_name'],
-                source_aws_url=command_data['source_aws_url']
+                source_aws_url=command_data['source_aws_url'],
+                total_epoch=command_data['total_epoch']
             )
         else:
             logger.warning(f'Unknown command: {command}')
@@ -127,12 +129,12 @@ class RVCService:
         ]
         return self.run_process(command)
 
-    def run_training(self, model_name: str, source_aws_url: str):
+    def run_training(self, model_name: str, source_aws_url: str, total_epoch: int):
 
         dataset_save_path = os.path.join(self.source_save_path, model_name)
         filename = source_aws_url.rsplit('/', maxsplit=1)[-1]
         full_path = os.path.join(dataset_save_path, filename)
-        print(f"Full path: {full_path}")
+
 
         if not os.path.exists(dataset_save_path):
             os.makedirs(dataset_save_path)
@@ -171,6 +173,7 @@ class RVCService:
         return_code, stderr = self.run_start_training_command(
             model_name=model_name,
             batch_size=self.batch_size,
+            total_epoch=total_epoch
         )
 
         if return_code != 0:
@@ -182,4 +185,3 @@ class RVCService:
 
 
 rvc_service = RVCService(source_save_path='sources')
-
