@@ -18,7 +18,7 @@ def create_channel():
     parameters = pika.URLParameters(settings.rmq_connection_url)
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
-    channel.queue_declare(queue=settings.queue_name, durable=True)
+    channel.queue_declare(queue=settings.queue_name)
     return connection, channel
 
 
