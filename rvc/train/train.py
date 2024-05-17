@@ -659,6 +659,14 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
         )
         sleep(1)
 
+        try:
+            rvc_service.send_model_info(
+                model_name=hps.name.rsplit('/', maxsplit=1)[-1],
+                model_status='READY'
+            )
+        except Exception as e:
+            logger.error(f"Error sending model info: {e}", exc_info=True)
+
         os._exit(2333333)
 
 
