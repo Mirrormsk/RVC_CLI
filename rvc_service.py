@@ -1,7 +1,9 @@
 import subprocess
 import logging
+import json
 import os
 from typing import List
+import fcntl
 
 from aws import AWSService
 from config import settings
@@ -17,13 +19,54 @@ class RVCService:
         self.files_for_process_dir = 'files'
         self.logs_dir = logs_dir
         self.batch_size = settings.batch_size
+        self.data_file = 'models.json'
 
         for path in (self.files_for_process_dir, self.source_save_path):
             if not os.path.exists(path):
                 os.makedirs(path)
 
-    def retrieve_command(self, command_data: dict):
+    def add_model_info(self, model_name: str, pth_path: str, index_path: str):
+        """Insert model info in json file"""
+        try:
+            with open(self.data_file, 'r+') as file:
+                fcntl.flock(file, fcntl.LOCK_EX)
 
+                try:
+                    data = json.load(file)
+                except (json.JSONDecodeError, FileNotFoundError):
+                        data = {}
+
+                data[model_name] = {
+                    'pth_path': pth_path,
+                    'index_path': index_path
+                }
+
+                file.seek(0)
+                file.truncate()
+
+                json.dump(data, file, indent=4)
+
+        except IOError as e:
+            logger.error(f"Eroor while try write data to json file: {e}")
+
+    def get_model_info(self, model_name: str):
+        """Returns model info dict"""
+        try:
+            with open(self.data_file, 'r') as file:
+                fcntl.flock(file, fcntl.LOCK_SH)
+
+                try:
+                    data = json.load(file)
+                except json.JSONDecodeError:
+                    return None
+                
+                return data.get(model_name, None)
+        except IOError as e:
+            logger.error(f"Error while try to read data from json file: {e}")
+            return None
+        
+    def retrieve_command(self, command_data: dict):
+        """Retrieve command from ampq"""
         if 'command' not in command_data:
             logger.warning(f'No command specified: {command_data}')
             return None
@@ -41,7 +84,7 @@ class RVCService:
             return None
 
     @staticmethod
-    def run_process(command: List[str]):
+    def _run_process(command: List[str]):
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         while True:
@@ -64,7 +107,7 @@ class RVCService:
             "--dataset_path", dataset_path,
             "--sampling_rate", str(sampling_rate)
         ]
-        return self.run_process(command)
+        return self._run_process(command)
 
     def run_extract_features_command(self, model_name: str, rvc_version: str = 'v2', f0method: str = "rmvpe",
                                      hop_length: int = 128,
@@ -79,7 +122,7 @@ class RVCService:
             "--hop_length", str(hop_length),
             "--sampling_rate", str(sampling_rate)
         ]
-        return self.run_process(command)
+        return self._run_process(command)
 
     def run_start_training_command(self, model_name: str,
                                    batch_size: str,
@@ -120,7 +163,7 @@ class RVCService:
             "--d_pretrained", d_pretrained or '',
         ]
         
-        return self.run_process(command)
+        return self._run_process(command)
 
     def run_generate_index_file_command(self, model_name: str, rvc_version: str = 'v2'):
         command = [
@@ -146,7 +189,7 @@ class RVCService:
             "--export_format", export_format,
 
         ]
-        return self.run_process(command)
+        return self._run_process(command)
 
 
     def run_training(self, model_name: str, source_aws_url: str, total_epoch: int):
