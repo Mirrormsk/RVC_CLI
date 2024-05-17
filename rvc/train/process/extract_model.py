@@ -19,6 +19,7 @@ def replace_keys_in_dict(d, old_key_part, new_key_part):
 
 
 def extract_model(ckpt, sr, if_f0, name, model_dir, epoch, step, version, hps):
+    print(f"Extracting model {name}")
     try:
         print(f"Saved model '{model_dir}' (epoch {epoch} and step {step})")
         pth_file = f"{name}_{epoch}e_{step}s.pth"
