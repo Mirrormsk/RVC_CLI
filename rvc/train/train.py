@@ -25,12 +25,11 @@ from torch.utils.tensorboard import SummaryWriter
 import torch.distributed as dist
 import torch.multiprocessing as mp
 
-# from control_api.rvc_service import rvc_service
-print("train.py current work dir:", os.getcwd())
-
+from control_api.rvc_service import rvc_service
 
 
 now_dir = os.getcwd()
+sys.path.append(os.path.join(now_dir))
 sys.path.append(os.path.join(now_dir))
 
 
@@ -293,14 +292,14 @@ def run(
 
 def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers, cache):
     global global_step, last_loss_gen_all, lowest_value, epochs_since_last_lowest
-    print(f"Epoch display: {epoch}")
-    # try:
-    #     rvc_service.send_model_info(
-    #         model_name=hps.name,
-    #         current_epoch=epoch
-    #     )
-    # except Exception as ex:
-    #     logger.error(f"Error while sending epoch info: {ex}", exc_info=True)
+
+    try:
+        rvc_service.send_model_info(
+            model_name=hps.name,
+            current_epoch=epoch
+        )
+    except Exception as ex:
+        logger.error(f"Error while sending epoch info: {ex}", exc_info=True)
 
     if epoch == 1:
         lowest_value = {"step": 0, "value": float("inf"), "epoch": 0}
@@ -637,13 +636,13 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
 
         save_filename = "{}_{}e_{}s.pth".format(hps.name, epoch, global_step)
 
-        # try:
-        #     rvc_service.add_model_info(
-        #         model_name=hps.name,
-        #         pth_path=os.path.join("logs", save_filename)
-        #     )
-        # except Exception as e:
-        #     print(f"Error adding model info: {e}")
+        try:
+            rvc_service.add_model_info(
+                model_name=hps.name,
+                pth_path=os.path.join("logs", save_filename)
+            )
+        except Exception as e:
+            print(f"Error adding model info: {e}")
 
         extract_model(
             ckpt,

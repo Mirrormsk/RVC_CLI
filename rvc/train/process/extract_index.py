@@ -4,7 +4,7 @@ import faiss
 import numpy as np
 from sklearn.cluster import MiniBatchKMeans
 from multiprocessing import cpu_count
-# from control_api.rvc_service import rvc_service
+from control_api.rvc_service import rvc_service
 
 print("extract_index.py current work dir:", os.getcwd())
 
@@ -82,11 +82,11 @@ try:
 
     faiss.write_index(index_added, index_filepath_added)
 
-    # rvc_service.add_model_info(
-    #     model_name=exp_dir,
-    #     index_path=os.path.join(exp_dir, index_filename_added)
-    # )
-    #
+    rvc_service.add_model_info(
+        model_name=exp_dir,
+        index_path=os.path.join(exp_dir, index_filename_added)
+    )
+
     print(f"Saved index file '{index_filepath_added}'")
     
 
