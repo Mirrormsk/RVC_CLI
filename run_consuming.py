@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from pika.exceptions import AMQPConnectionError
 
 # from rmq_config import create_channel
-from rvc_service import rvc_service
+from control_api.rvc_service import rvc_service
 import logging
 from config import settings
 
