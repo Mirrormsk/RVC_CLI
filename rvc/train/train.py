@@ -634,10 +634,13 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
 
         save_filename = "{}_{}e_{}s.pth".format(hps.name, epoch, global_step)
 
-        rvc_service.add_model_info(
-            model_name=hps.name,
-            pth_path=os.path.join("logs", save_filename)
-        )
+        try:
+            rvc_service.add_model_info(
+                model_name=hps.name,
+                pth_path=os.path.join("logs", save_filename)
+            )
+        except Exception as e:
+            print(f"Error adding model info: {e}")
 
         extract_model(
             ckpt,
