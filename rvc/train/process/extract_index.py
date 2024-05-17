@@ -83,7 +83,7 @@ try:
     faiss.write_index(index_added, index_filepath_added)
 
     rvc_service.add_model_info(
-        model_name=exp_dir,
+        model_name=exp_dir.rsplit('/', maxsplit=1)[-1],
         index_path=os.path.join(exp_dir, index_filename_added)
     )
 

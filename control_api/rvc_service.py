@@ -54,13 +54,15 @@ class RVCService:
                 if index_path is not None:
                     model_data['index_path'] = index_path
 
+                data[model_name] = model_data
+
                 file.seek(0)
                 file.truncate()
 
                 json.dump(data, file, indent=4)
 
         except IOError as e:
-            logger.error(f"Eroor while try write data to json file: {e}")
+            logger.error(f"Error while try write data to json file: {e}")
 
     def get_model_info(self, model_name: str):
         """Returns model info dict"""
