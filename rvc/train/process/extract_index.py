@@ -4,6 +4,7 @@ import faiss
 import numpy as np
 from sklearn.cluster import MiniBatchKMeans
 from multiprocessing import cpu_count
+from rvc_service import rvc_service
 
 exp_dir = sys.argv[1]
 version = sys.argv[2]
@@ -78,7 +79,12 @@ try:
         index_added.add(big_npy[i : i + batch_size_add])
 
     faiss.write_index(index_added, index_filepath_added)
+
+    rvc_service.add_model_info(
+        model_name=
+    )
     print(f"Saved index file '{index_filepath_added}'")
+    
 
 except Exception as error:
     print(f"Failed to train index: {error}")

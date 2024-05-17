@@ -290,7 +290,7 @@ def run(
 
 def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers, cache):
     global global_step, last_loss_gen_all, lowest_value, epochs_since_last_lowest
-
+    print(f"Epoch display: {epoch}")
     try:
         rvc_service.send_model_info(
             model_name=hps.name,
@@ -635,7 +635,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
         save_filename = "{}_{}e_{}s.pth".format(hps.name, epoch, global_step)
 
         rvc_service.add_model_info(
-            model_name=hps.model_dir,
+            model_name=hps.name,
             pth_path=os.path.join("logs", save_filename)
         )
 
