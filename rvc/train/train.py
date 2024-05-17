@@ -295,7 +295,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
 
     try:
         rvc_service.send_model_info(
-            model_name=hps.name,
+            model_name=hps.name.rsplit('/', maxsplit=1)[-1],
             current_epoch=epoch
         )
     except Exception as ex:
@@ -638,7 +638,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
 
         try:
             rvc_service.add_model_info(
-                model_name=hps.name,
+                model_name=hps.name.rsplit('/', maxsplit=1)[-1],
                 pth_path=os.path.join("logs", save_filename)
             )
         except Exception as e:
