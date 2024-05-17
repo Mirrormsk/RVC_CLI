@@ -24,6 +24,8 @@ from torch.utils.tensorboard import SummaryWriter
 import torch.distributed as dist
 import torch.multiprocessing as mp
 
+from rvc_service import rvc_service
+
 now_dir = os.getcwd()
 sys.path.append(os.path.join(now_dir))
 
@@ -619,14 +621,20 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
         else:
             ckpt = net_g.state_dict()
 
+        save_filename = "{}_{}e_{}s.pth".format(hps.name, epoch, global_step)
+        
+        rvc_service.add_model_info(
+            model_name=hps.model_dir,
+            pth_path=os.path.join("logs", save_filename)
+        )
+
         extract_model(
             ckpt,
             hps.sample_rate,
             hps.if_f0,
             hps.name,
             os.path.join(
-                # hps.model_dir, "{}_{}e_{}s.pth".format(hps.name, epoch, global_step)
-                hps.model_dir, ".pth".format(hps.name)
+                hps.model_dir, save_filename
             ),
             epoch,
             global_step,
@@ -634,6 +642,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             hps,
         )
         sleep(1)
+
         os._exit(2333333)
 
 
