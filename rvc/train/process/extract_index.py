@@ -4,7 +4,7 @@ import faiss
 import numpy as np
 from sklearn.cluster import MiniBatchKMeans
 from multiprocessing import cpu_count
-from rvc_service import rvc_service
+from control_api.rvc_service import rvc_service
 
 exp_dir = sys.argv[1]
 version = sys.argv[2]
