@@ -25,7 +25,7 @@ from torch.utils.tensorboard import SummaryWriter
 import torch.distributed as dist
 import torch.multiprocessing as mp
 
-from rvc_service import rvc_service
+from control_api.rvc_service import rvc_service
 
 now_dir = os.getcwd()
 sys.path.append(os.path.join(now_dir))

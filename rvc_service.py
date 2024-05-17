@@ -23,6 +23,8 @@ class RVCService:
         self.data_file = 'models.json'
         self.callback_url = settings.callback_url
         self.requests_retry = 5
+        self.python_command = 'python'
+        self.main_py_path = os.path.join('..', 'main.py')
 
         for path in (self.files_for_process_dir, self.source_save_path):
             if not os.path.exists(path):
@@ -134,8 +136,8 @@ class RVCService:
 
     def prepare_source(self, dataset_path: str, model_name: str, sampling_rate: int = 40000):
         command = [
-            "python",
-            "main.py",
+            self.python_command,
+            self.main_py_path,
             "preprocess",
             "--model_name", model_name,
             "--dataset_path", dataset_path,
@@ -147,8 +149,8 @@ class RVCService:
                                      hop_length: int = 128,
                                      sampling_rate: int = 40000):
         command = [
-            "python",
-            "main.py",
+            self.python_command,
+            self.main_py_path,
             "extract",
             "--model_name", model_name,
             "--rvc_version", rvc_version,
@@ -176,8 +178,8 @@ class RVCService:
                                    d_pretrained: str = None,
                                    ):
         command = [
-            "python",
-            "main.py",
+            self.python_command,
+            self.main_py_path,
             "train",
             "--model_name", model_name,
             "--rvc_version", rvc_version,
@@ -201,8 +203,8 @@ class RVCService:
 
     def run_generate_index_file_command(self, model_name: str, rvc_version: str = 'v2'):
         command = [
-            "python",
-            "main.py",
+            self.python_command,
+            self.main_py_path,
             "index",
             "--model_name", model_name,
             "--rvc_version", rvc_version,
@@ -212,8 +214,8 @@ class RVCService:
     def run_infer_command(self, model_name: str, input_path: str, output_path: str,
                           pth_path: str, index_path: str, export_format: str = 'WAV'):
         command = [
-            "python",
-            "main.py",
+            self.python_command,
+            self.main_py_path,
             "index",
             "--model_name", model_name,
             "--input_path", input_path,
