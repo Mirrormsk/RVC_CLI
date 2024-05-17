@@ -31,3 +31,4 @@ venv/
 control_api/.env
 .idea
 .vscode
+.env
