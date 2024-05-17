@@ -128,6 +128,11 @@ class RVCService:
                 source_aws_url=command_data["source_aws_url"],
                 total_epoch=command_data["total_epoch"],
             )
+        elif command == "process":
+            return self.run_infer(
+                model_name=command_data["model_name"],
+                file_aws_url=command_data["file_aws_url"],
+            )
         else:
             logger.warning(f"Unknown command: {command}")
             return None
