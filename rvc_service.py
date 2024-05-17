@@ -89,11 +89,7 @@ class RVCService:
             else:
                 if response.status_code == 200:
                     break
-                
 
-
-
-        
     def retrieve_command(self, command_data: dict):
         """Retrieve command from ampq"""
         if 'command' not in command_data:
@@ -222,6 +218,11 @@ class RVCService:
 
 
     def run_training(self, model_name: str, source_aws_url: str, total_epoch: int):
+
+        self.send_model_info(
+            model_name=model_name,
+            model_status='IN_PROGRESS'
+        )
 
         dataset_save_path = os.path.join(self.source_save_path, model_name)
         filename = source_aws_url.rsplit('/', maxsplit=1)[-1]
