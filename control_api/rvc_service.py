@@ -24,7 +24,7 @@ class RVCService:
         self.callback_url = settings.callback_url
         self.requests_retry = 5
         self.python_command = 'python'
-        self.main_py_path = os.path.join('..', 'main.py')
+        self.main_py_path = 'main.py'
 
         for path in (self.files_for_process_dir, self.source_save_path):
             if not os.path.exists(path):
