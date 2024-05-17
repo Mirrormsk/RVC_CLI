@@ -1,6 +1,7 @@
 import subprocess
 import logging
 import json
+import requests
 import os
 from typing import List
 import fcntl
@@ -20,6 +21,8 @@ class RVCService:
         self.logs_dir = logs_dir
         self.batch_size = settings.batch_size
         self.data_file = 'models.json'
+        self.callback_url = settings.callback_url
+        self.requests_retry = 5
 
         for path in (self.files_for_process_dir, self.source_save_path):
             if not os.path.exists(path):
@@ -64,6 +67,32 @@ class RVCService:
         except IOError as e:
             logger.error(f"Error while try to read data from json file: {e}")
             return None
+        
+    def send_model_info(self, model_name: str, model_status: str = None, current_epoch: int = None) -> None:
+        """Send model status to server"""
+
+        data = {
+            'event_type': 'update_model_info',
+            'model_name': model_name,
+            'model_status': model_status,
+            'current_epoch': current_epoch
+        }
+
+        for _ in range(self.requests_retry):
+            try:
+                response = requests.post(
+                    url=self.callback_url,
+                    data=data,
+                )
+            except requests.exceptions.RequestException as ex:
+                logger.error(f"Error while sending callback: {ex}", exc_info=True)
+            else:
+                if response.status_code == 200:
+                    break
+                
+
+
+
         
     def retrieve_command(self, command_data: dict):
         """Retrieve command from ampq"""

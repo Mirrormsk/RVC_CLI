@@ -2,6 +2,7 @@ import torch
 import sys
 import os
 import datetime
+import logging
 
 from utils import (
     get_hparams,
@@ -29,6 +30,8 @@ from rvc_service import rvc_service
 now_dir = os.getcwd()
 sys.path.append(os.path.join(now_dir))
 
+
+logger = logging.getLogger(__name__)
 
 from data_utils import (
     DistributedBucketSampler,
@@ -287,6 +290,14 @@ def run(
 
 def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers, cache):
     global global_step, last_loss_gen_all, lowest_value, epochs_since_last_lowest
+
+    try:
+        rvc_service.send_model_info(
+            model_name=hps.name,
+            current_epoch=epoch
+        )
+    except Exception as ex:
+        logger.error(f"Error while sending epoch info: {ex}", exc_info=True)
 
     if epoch == 1:
         lowest_value = {"step": 0, "value": float("inf"), "epoch": 0}
@@ -622,7 +633,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             ckpt = net_g.state_dict()
 
         save_filename = "{}_{}e_{}s.pth".format(hps.name, epoch, global_step)
-        
+
         rvc_service.add_model_info(
             model_name=hps.model_dir,
             pth_path=os.path.join("logs", save_filename)

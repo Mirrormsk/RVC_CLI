@@ -13,6 +13,7 @@ class AppSettings(BaseSettings):
     queue_name: str = Field(env='QUEUE_NAME')
     rmq_connection_url: str = Field(env='RMQ_CONNECTION_URL')
     batch_size: str = Field(env='BATCH_SIZE', default=6)
+    callback_url: str = Field(env='CALLBACK_URL')
 
     class Config:
         env_file = '.env'
