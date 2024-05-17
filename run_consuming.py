@@ -27,17 +27,15 @@ def callback(ch, method, properties, body):
     logger.info('Received %r', json_data)
     try:
         rvc_service.retrieve_command(command_data=json_data)
-        ch.basic_ack(delivery_tag=method.delivery_tag)
     except Exception as e:
         logger.error(e, exc_info=True)
-        ch.basic_nack(delivery_tag=method.delivery_tag)
 
 
 def main():
     while True:
         try:
             connection, channel = create_channel()
-            channel.basic_consume(queue=settings.queue_name, on_message_callback=callback, auto_ack=False)
+            channel.basic_consume(queue=settings.queue_name, on_message_callback=callback, auto_ack=True)
             logger.info('Waiting for messages')
             channel.start_consuming()
         except AMQPConnectionError as e:

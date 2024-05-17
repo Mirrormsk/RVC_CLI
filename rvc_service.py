@@ -119,6 +119,7 @@ class RVCService:
             "--g_pretrained", g_pretrained or '',
             "--d_pretrained", d_pretrained or '',
         ]
+        
         return self.run_process(command)
 
     def run_generate_index_file_command(self, model_name: str, rvc_version: str = 'v2'):
