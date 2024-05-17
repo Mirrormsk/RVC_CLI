@@ -87,6 +87,7 @@ class RVCService:
             except requests.exceptions.RequestException as ex:
                 logger.error(f"Error while sending callback: {ex}", exc_info=True)
             else:
+                print(response.json())
                 if response.status_code == 200:
                     break
 
