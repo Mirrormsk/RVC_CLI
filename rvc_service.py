@@ -28,7 +28,11 @@ class RVCService:
             if not os.path.exists(path):
                 os.makedirs(path)
 
-    def add_model_info(self, model_name: str, pth_path: str, index_path: str):
+        if not os.path.exists(self.data_file):
+            with open(self.data_file, 'w') as file:
+                json.dump({}, file)
+
+    def add_model_info(self, model_name: str, pth_path: str = None, index_path: str = None):
         """Insert model info in json file"""
         try:
             with open(self.data_file, 'r+') as file:
@@ -38,11 +42,14 @@ class RVCService:
                     data = json.load(file)
                 except (json.JSONDecodeError, FileNotFoundError):
                         data = {}
+                
+                model_data = data.get(model_name, dict())
 
-                data[model_name] = {
-                    'pth_path': pth_path,
-                    'index_path': index_path
-                }
+                if pth_path is not None:
+                    model_data['pth_path'] = pth_path
+
+                if index_path is not None:
+                    model_data['index_path'] = index_path
 
                 file.seek(0)
                 file.truncate()
