@@ -34,6 +34,7 @@ class RVCService:
 
     def add_model_info(self, model_name: str, pth_path: str = None, index_path: str = None):
         """Insert model info in json file"""
+        print(f"Adding model info for {model_name}")
         try:
             with open(self.data_file, 'r+') as file:
                 fcntl.flock(file, fcntl.LOCK_EX)
@@ -206,7 +207,7 @@ class RVCService:
             "--model_name", model_name,
             "--rvc_version", rvc_version,
         ]
-        return self.run_process(command)
+        return self._run_process(command)
 
     def run_infer_command(self, model_name: str, input_path: str, output_path: str,
                           pth_path: str, index_path: str, export_format: str = 'WAV'):
@@ -282,6 +283,19 @@ class RVCService:
             return
         else:
             logger.info('Start training process succeeded')
+
+        # Generate index File
+
+        return_code, stderr = self.run_generate_index_file_command(
+            model_name=model_name,
+        )
+
+        if return_code != 0:
+            logger.error(
+                f'Generate index process failed, stop execution. Errors: {stderr}')
+            return
+        else:
+            logger.info('Generate index process succeeded')
 
         logger.info(f"Training task finished! Listen for new messages")
 
