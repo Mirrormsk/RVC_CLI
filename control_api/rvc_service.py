@@ -28,6 +28,7 @@ class RVCService:
         self.requests_retry = 5
         self.python_command = "python"
         self.main_py_path = "main.py"
+        self.s3_results_path = 'received_from_rvc'
 
         for path in (
             self.files_for_process_dir,
@@ -89,6 +90,22 @@ class RVCService:
             logger.error(f"Error while try to read data from json file: {e}")
             return None
 
+    def send_callback_data(self, data: dict) -> None:
+        """Send data to server"""
+
+        for _ in range(self.requests_retry):
+            try:
+                response = requests.post(
+                    url=self.callback_url,
+                    data=data,
+                )
+            except requests.exceptions.RequestException as ex:
+                logger.error(f"Error while sending callback: {ex}", exc_info=True)
+            else:
+                logger.debug(f"Response from server: {response.json()}")
+                if response.status_code == 200:
+                    break
+
     def send_model_info(
         self, model_name: str, model_status: str = None, current_epoch: int = None
     ) -> None:
@@ -101,18 +118,17 @@ class RVCService:
             "current_epoch": current_epoch,
         }
 
-        for _ in range(self.requests_retry):
-            try:
-                response = requests.post(
-                    url=self.callback_url,
-                    data=data,
-                )
-            except requests.exceptions.RequestException as ex:
-                logger.error(f"Error while sending callback: {ex}", exc_info=True)
-            else:
-                print(response.json())
-                if response.status_code == 200:
-                    break
+        self.send_callback_data(data)
+
+    def send_convert_result(self, file_id: int, s3_path: str):
+        """Send converted result to server"""
+
+        data = {
+            "event_type": "save_result",
+            "file_id": file_id,
+
+        }
+        self.send_callback_data(data)
 
     def retrieve_command(self, command_data: dict):
         """Retrieve command from ampq"""
@@ -132,6 +148,7 @@ class RVCService:
             return self.run_infer(
                 model_name=command_data["model_name"],
                 file_aws_url=command_data["file_aws_url"],
+                file_id=command_data["file_id"]
             )
         else:
             logger.warning(f"Unknown command: {command}")
@@ -369,9 +386,10 @@ class RVCService:
 
         logger.info(f"Training task finished! Listen for new messages")
 
-    def run_infer(self, model_name: str, file_aws_url: str):
+    def run_infer(self, model_name: str, file_aws_url: str, file_id: int):
         filename = file_aws_url.rsplit("/", maxsplit=1)[-1]
         full_path = os.path.join(self.files_for_process_dir, filename)
+        filename_with_ext = filename.split(".")[0] + "wav"
 
         AWSService.download_file(file_aws_url, full_path)
 
@@ -383,7 +401,7 @@ class RVCService:
 
         return_code, stderr = self.run_infer_command(
             input_path=full_path,
-            output_path=os.path.join(self.results_path, filename.split(".")[0] + "wav"),
+            output_path=os.path.join(self.results_path, filename_with_ext),
             pth_path=model_data.get("pth_path"),
             index_path=model_data.get("index_path"),
         )
@@ -392,6 +410,7 @@ class RVCService:
             logger.error(
                 f"File processing failed, stop execution. Errors: {stderr}"
             )
+            self.send_convert_result(file_id=file_id, s3_path=f"{self.s3_results_path}/{filename_with_ext}")
             return
         else:
             logger.info("File processing succeeded")
