@@ -389,7 +389,7 @@ class RVCService:
     def run_infer(self, model_name: str, file_aws_url: str, file_id: int):
         filename = file_aws_url.rsplit("/", maxsplit=1)[-1]
         full_path = os.path.join(self.files_for_process_dir, filename)
-        filename_with_ext = filename.split(".")[0] + "wav"
+        filename_with_ext = filename.split(".")[0] + ".wav"
 
         AWSService.download_file(file_aws_url, full_path)
 
