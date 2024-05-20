@@ -126,7 +126,7 @@ class RVCService:
         data = {
             "event_type": "save_result",
             "file_id": file_id,
-
+            "s3_path": s3_path,
         }
         self.send_callback_data(data)
 
