@@ -413,7 +413,7 @@ class RVCService:
             return
         else:
             logger.info("File processing succeeded")
-            self.send_convert_result(file_id=file_id, s3_path=f"{self.s3_results_path}/{filename_with_ext}")
+            self.send_convert_result(file_id=int(file_id), s3_path=f"{self.s3_results_path}/{filename_with_ext}")
 
 
 rvc_service = RVCService(source_save_path="sources", results_path="results")
