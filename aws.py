@@ -2,6 +2,8 @@ import os
 from urllib.parse import urlparse
 
 import boto3
+from botocore.exceptions import ClientError
+
 from config import settings
 
 #
@@ -35,3 +37,14 @@ class AWSService:
             file.write(file_content)
 
         print(f"File saved to {path_to_save}")
+
+    @staticmethod
+    def upload_file_to_s3(local_path: str, s3_path: str):
+        try:
+            s3.upload_file(
+                local_path,
+                settings.aws_storage_bucket_name,
+                s3_path
+            )
+        except ClientError as e:
+            print(e)

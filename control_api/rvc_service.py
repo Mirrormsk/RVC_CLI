@@ -389,7 +389,10 @@ class RVCService:
     def run_infer(self, model_name: str, file_aws_url: str, file_id: int):
         filename = file_aws_url.rsplit("/", maxsplit=1)[-1]
         full_path = os.path.join(self.files_for_process_dir, filename)
+
         filename_with_ext = filename.split(".")[0] + ".wav"
+        output_path = os.path.join(self.results_path, filename_with_ext)
+        s3_path = f"{self.s3_results_path}/{filename_with_ext}"
 
         AWSService.download_file(file_aws_url, full_path)
 
@@ -401,7 +404,7 @@ class RVCService:
 
         return_code, stderr = self.run_infer_command(
             input_path=full_path,
-            output_path=os.path.join(self.results_path, filename_with_ext),
+            output_path=output_path,
             pth_path=model_data.get("pth_path"),
             index_path=model_data.get("index_path"),
         )
@@ -413,7 +416,8 @@ class RVCService:
             return
         else:
             logger.info("File processing succeeded")
-            self.send_convert_result(file_id=int(file_id), s3_path=f"{self.s3_results_path}/{filename_with_ext}")
+            AWSService.upload_file_to_s3(output_path, s3_path=s3_path)
+            self.send_convert_result(file_id=int(file_id), s3_path=s3_path)
 
 
 rvc_service = RVCService(source_save_path="sources", results_path="results")
