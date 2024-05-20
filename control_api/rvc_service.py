@@ -181,6 +181,8 @@ class RVCService:
                 model_name=command_data["model_name"],
                 file_aws_url=command_data["file_aws_url"],
                 file_id=command_data["file_id"],
+                pth_file_s3_path=command_data["pth_file_s3_path"],
+                index_file_s3_path=command_data["index_file_s3_path"],
             )
         else:
             logger.warning(f"Unknown command: {command}")
@@ -432,6 +434,8 @@ class RVCService:
         filename_with_ext = filename.split(".")[0] + ".wav"
         output_path = os.path.join(self.results_path, filename_with_ext)
         s3_path = f"{self.s3_results_path}/{filename_with_ext}"
+
+        print(f"Running inference on {filename_with_ext}")
 
         AWSService.download_file(file_aws_url, full_path)
 
