@@ -12,8 +12,16 @@ from aws import AWSService
 from config import settings
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
+
+
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.DEBUG)
+logger.addHandler(stream_handler)
+
+file_handler = logging.FileHandler('warnings.log')
+file_handler.setLevel(logging.WARNING)
+logger.addHandler(file_handler)
 
 
 class RVCService:
@@ -362,14 +370,14 @@ class RVCService:
 
         AWSService.download_file(source_aws_url, full_path)
 
-        print(f"Starting prepare process for model {model_name}")
+        logger.info(f"Starting prepare process for model {model_name}")
 
         #  Prepare
         return_code, stderr = self.prepare_source(
             dataset_path=dataset_save_path,
             model_name=model_name,
         )
-        print(f"Finished prepare process for model {model_name}")
+        logger.info(f"Finished prepare process for model {model_name}")
 
         if return_code != 0:
             logger.error(f"Prepare process failed: {return_code}. Errors: {stderr}")
@@ -378,12 +386,12 @@ class RVCService:
             logger.info("Prepare process succeeded")
 
         # Extract features
-        print(f"Starting extract features process for model {model_name}")
+        logger.info(f"Starting extract features process for model {model_name}")
         return_code, stderr = self.run_extract_features_command(
             model_name=model_name,
         )
 
-        print(f"Finished extract features process for model {model_name}")
+        logger.info(f"Finished extract features process for model {model_name}")
         if return_code != 0:
             logger.error(
                 f"Extract features process failed, stop execution. Errors: {stderr}"
@@ -472,8 +480,14 @@ class RVCService:
             return
         else:
             logger.info("File processing succeeded")
-            AWSService.upload_file_to_s3(output_path, s3_path=s3_path)
-            self.send_convert_result(file_id=int(file_id), s3_path=s3_path)
+            try:
+                AWSService.upload_file_to_s3(output_path, s3_path=s3_path)
+            except Exception as ex:
+                logger.error(f"Error while trying to upload model info: {ex}", exc_info=True)
+            try:
+                self.send_convert_result(file_id=int(file_id), s3_path=s3_path)
+            except Exception as ex:
+                logger.error(f"Error while trying to send convert result: {ex}", exc_info=True)
 
 
 rvc_service = RVCService(source_save_path="sources", results_path="results")
