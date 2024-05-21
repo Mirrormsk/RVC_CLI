@@ -512,6 +512,7 @@ class RVCService:
             try:
                 if export_format != 'WAV':
                     output_path = output_path.replace(".wav", "." + export_format.lower())
+                    s3_path = output_path.replace(".wav", "." + export_format.lower())
 
                 AWSService.upload_file_to_s3(output_path, s3_path=s3_path)
             except Exception as ex:
