@@ -315,7 +315,7 @@ def infer_pipeline(
             if cleaned_audio is not None:
                 sf.write(audio_output_path, cleaned_audio, tgt_sr, format="WAV")
 
-        logger.info(f"Trying to convert audio to {export_format}")
+        logger.warning(f"Trying to convert audio to {export_format}")
 
         try:
             output_path_format = audio_output_path.replace(

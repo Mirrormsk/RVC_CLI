@@ -354,6 +354,7 @@ class RVCService:
             "--export_format",
             export_format,
         ]
+        print(f"Command: {command}")
 
         return self._run_process(command)
 
