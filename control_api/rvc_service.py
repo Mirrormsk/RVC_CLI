@@ -508,10 +508,15 @@ class RVCService:
             return
         else:
             logger.info("File processing succeeded")
+
             try:
+                if export_format != 'WAV':
+                    output_path = output_path.replace(".wav", "." + export_format.lower())
+
                 AWSService.upload_file_to_s3(output_path, s3_path=s3_path)
             except Exception as ex:
                 logger.error(f"Error while trying to upload model info: {ex}", exc_info=True)
+
             try:
                 self.send_convert_result(file_id=int(file_id), s3_path=s3_path)
             except Exception as ex:
