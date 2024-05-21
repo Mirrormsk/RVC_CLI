@@ -354,7 +354,6 @@ class RVCService:
             "--export_format",
             export_format,
         ]
-        print(f"Command: {command}")
 
         return self._run_process(command)
 
@@ -492,3 +491,6 @@ class RVCService:
 
 
 rvc_service = RVCService(source_save_path="sources", results_path="results")
+
+
+# python main.py infer --input_path 'files/rec20.wav' --output_path 'results/rec20.wav' --pth_path 'logs/guf-3.pth' --index_path 'logs/guf/added_IVF794_Flat_nprobe_1_guf-3_v2.index' --export_format 'OGG'

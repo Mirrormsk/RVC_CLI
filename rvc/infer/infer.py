@@ -324,6 +324,7 @@ def infer_pipeline(
             audio_output_path = convert_audio_format(
                 audio_output_path, output_path_format, export_format
             )
+            print(f"Converting audio to {export_format}. Output path: {audio_output_path}")
         except Exception as e:
             logger.error(f"Error while converting audio: {e}", exc_info=True)
 
