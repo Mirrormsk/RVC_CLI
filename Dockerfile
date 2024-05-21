@@ -4,9 +4,9 @@ WORKDIR /app
 
 COPY . /app
 
-RUN python main.py prerequisites
-
 RUN pip install -r requirements.txt
+
+RUN python main.py prerequisites
 
 EXPOSE 5672
 
