@@ -1,6 +1,8 @@
+import queue
 import subprocess
 import logging
 import json
+import threading
 
 import botocore
 import requests
@@ -198,26 +200,52 @@ class RVCService:
             return None
 
     @staticmethod
+    def _enqueue_output(pipe, q):
+        try:
+            for line in iter(pipe.readline, ''):
+                q.put(line)
+        finally:
+            pipe.close()
+
+    @staticmethod
     def _run_process(command: List[str]):
         process = subprocess.Popen(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         )
 
+        q_stdout = queue.Queue()
+        q_stderr = queue.Queue()
+
+        t_stdout = threading.Thread(target=RVCService._enqueue_output, args=(process.stdout, q_stdout))
+        t_stderr = threading.Thread(target=RVCService._enqueue_output, args=(process.stderr, q_stderr))
+
+        t_stdout.start()
+        t_stderr.start()
+
         while True:
-            output = process.stdout.readline()
-            if output == "" and process.poll() is not None:
-                break
-            if output:
+            try:
+                output = q_stdout.get_nowait()
+            except queue.Empty:
+                if process.poll() is not None:
+                    break
+            else:
                 print(output.strip())
-        stderr = process.stderr.read()
+
+        t_stdout.join()
+        t_stderr.join()
+
+        stderr_output = ""
+        while not q_stderr.empty():
+            stderr_output += q_stderr.get_nowait()
+
         return_code = process.poll()
 
         if return_code != 0:
             print(f"Command failed with return code {return_code}")
-            if stderr:
-                print(f"Errors: {stderr}")
+            if stderr_output:
+                print(f"Errors: {stderr_output}")
 
-        return return_code, stderr
+        return return_code, stderr_output
 
     def prepare_source(
         self, dataset_path: str, model_name: str, sampling_rate: int = 40000
