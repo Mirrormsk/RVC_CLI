@@ -183,6 +183,7 @@ class RVCService:
                 file_id=command_data["file_id"],
                 pth_file_s3_path=command_data["pth_file_s3_path"],
                 index_file_s3_path=command_data["index_file_s3_path"],
+                export_format=command_data["export_format"],
             )
         else:
             logger.warning(f"Unknown command: {command}")
@@ -427,6 +428,7 @@ class RVCService:
         file_id: int,
         pth_file_s3_path: str,
         index_file_s3_path: str,
+        export_format: str,
     ):
         filename = file_aws_url.rsplit("/", maxsplit=1)[-1]
         full_path = os.path.join(self.files_for_process_dir, filename)
@@ -462,6 +464,7 @@ class RVCService:
             output_path=output_path,
             pth_path=model_data.get("pth_path"),
             index_path=model_data.get("index_path"),
+            export_format=export_format,
         )
 
         if return_code != 0:
