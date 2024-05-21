@@ -2,15 +2,11 @@ FROM python:3.9
 
 WORKDIR /app
 
-COPY install.sh /app/install.sh
-
-RUN chmod +x install.sh
-
 COPY . /app
 
 RUN python main.py prerequisites
 
-RUN ./install.sh
+RUN pip install -r requirements.txt
 
 EXPOSE 5672
 
