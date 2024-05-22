@@ -11,6 +11,7 @@ pyyaml
 ml_collections
 python-dotenv
 requests
+pika
 
 # Audio processing
 faiss-cpu==1.7.3
