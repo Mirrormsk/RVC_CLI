@@ -13,6 +13,8 @@ python-dotenv
 requests
 pika
 pydantic-settings
+boto3
+botocore
 
 # Audio processing
 faiss-cpu==1.7.3
