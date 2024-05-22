@@ -6,5 +6,5 @@ COPY . /app
 
 RUN pip install -r requirements.txt
 
-RUN python main.py prerequisites
+#RUN python main.py prerequisites
 
