@@ -518,10 +518,12 @@ class RVCService:
             except Exception as ex:
                 logger.error(f"Error while trying to upload model info: {ex}", exc_info=True)
 
-            try:
-                self.send_convert_result(file_id=int(file_id), s3_path=s3_path)
-            except Exception as ex:
-                logger.error(f"Error while trying to send convert result: {ex}", exc_info=True)
+            else:
+
+                try:
+                    self.send_convert_result(file_id=int(file_id), s3_path=s3_path)
+                except Exception as ex:
+                    logger.error(f"Error while trying to send convert result: {ex}", exc_info=True)
 
 
 rvc_service = RVCService(source_save_path="sources", results_path="results")
