@@ -12,6 +12,7 @@ ml_collections
 python-dotenv
 requests
 pika
+pydantic-settings
 
 # Audio processing
 faiss-cpu==1.7.3
