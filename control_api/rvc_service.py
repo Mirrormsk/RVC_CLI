@@ -106,6 +106,8 @@ class RVCService:
     def send_callback_data(self, data: dict) -> None:
         """Send data to server"""
 
+        data.update(secret_key=settings.secret_key)
+
         for _ in range(self.requests_retry):
             try:
                 response = requests.post(
@@ -170,6 +172,7 @@ class RVCService:
             "file_id": file_id,
             "s3_path": s3_path,
         }
+
         self.send_callback_data(data)
 
     def retrieve_command(self, command_data: dict):
@@ -473,7 +476,7 @@ class RVCService:
         output_path = os.path.join(self.results_path, filename_with_ext)
         s3_path = f"{self.s3_results_path}/{filename_with_ext}"
 
-        print(f"Running inference on {filename_with_ext}")
+        logger.info(f"Running inference on {filename_with_ext}")
 
         AWSService.download_file(file_aws_url, full_path)
 

@@ -14,6 +14,7 @@ class AppSettings(BaseSettings):
     rmq_connection_url: str = Field(env='RMQ_CONNECTION_URL')
     batch_size: str = Field(env='BATCH_SIZE', default=6)
     callback_url: str = Field(env='CALLBACK_URL')
+    secret_key: str = Field(env='SECRET_KEY')
 
     class Config:
         env_file = '.env'
