@@ -29,6 +29,8 @@ from rvc.lib.utils import load_embedding
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("httpcore").setLevel(logging.WARNING)
 
+logger = logging.getLogger("rvc_service")
+
 config = Config()
 hubert_model = None
 tgt_sr = None
@@ -66,6 +68,7 @@ def remove_audio_noise(input_audio_path, reduction_strength=0.7):
 
 
 def convert_audio_format(input_path, output_path, output_format):
+
     try:
         if output_format != "WAV":
             print(f"Converting audio to {output_format} format...")
@@ -317,12 +320,18 @@ def infer_pipeline(
             if cleaned_audio is not None:
                 sf.write(audio_output_path, cleaned_audio, tgt_sr, format="WAV")
 
-        output_path_format = audio_output_path.replace(
-            ".wav", f".{export_format.lower()}"
-        )
-        audio_output_path = convert_audio_format(
-            audio_output_path, output_path_format, export_format
-        )
+        logger.warning(f"Trying to convert audio to {export_format}")
+
+        try:
+            output_path_format = audio_output_path.replace(
+                ".wav", f".{export_format.lower()}"
+            )
+            audio_output_path = convert_audio_format(
+                audio_output_path, output_path_format, export_format
+            )
+            print(f"Converting audio to {export_format}. Output path: {audio_output_path}")
+        except Exception as e:
+            logger.error(f"Error while converting audio: {e}", exc_info=True)
 
         end_time = time.time()
         elapsed_time = end_time - start_time

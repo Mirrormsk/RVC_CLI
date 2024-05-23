@@ -6,6 +6,11 @@ from botocore.exceptions import ClientError
 
 from config import settings
 
+#
+# s3 = boto3.client(
+#     service_name='s3',
+#     endpoint_url='https://s3.ru-1.storage.selcloud.ru'
+# )
 
 session = boto3.Session(
     aws_access_key_id=settings.aws_access_key_id,
@@ -21,9 +26,7 @@ class AWSService:
     def download_file(file_s3_url: str, path_to_save: str):
         parsed_url = urlparse(file_s3_url)
         file_s3_key = parsed_url.path.lstrip('/')
-
         print(f"Downloading {file_s3_key} from {file_s3_url}")
-
         get_object_response = s3.get_object(Bucket=settings.aws_storage_bucket_name, Key=file_s3_key)
 
         file_content = get_object_response['Body'].read()
@@ -36,7 +39,7 @@ class AWSService:
         print(f"File saved to {path_to_save}")
 
     @staticmethod
-    def upload_file(local_path: str, s3_path: str):
+    def upload_file_to_s3(local_path: str, s3_path: str):
         try:
             s3.upload_file(
                 local_path,

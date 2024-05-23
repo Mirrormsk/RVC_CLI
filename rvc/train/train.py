@@ -2,6 +2,7 @@ import torch
 import sys
 import os
 import datetime
+import logging
 
 from utils import (
     get_hparams,
@@ -24,9 +25,15 @@ from torch.utils.tensorboard import SummaryWriter
 import torch.distributed as dist
 import torch.multiprocessing as mp
 
+from control_api.rvc_service import rvc_service
+
+
 now_dir = os.getcwd()
 sys.path.append(os.path.join(now_dir))
+sys.path.append(os.path.join(now_dir))
 
+
+logger = logging.getLogger(__name__)
 
 from data_utils import (
     DistributedBucketSampler,
@@ -285,6 +292,14 @@ def run(
 
 def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers, cache):
     global global_step, last_loss_gen_all, lowest_value, epochs_since_last_lowest
+
+    try:
+        rvc_service.send_model_info(
+            model_name=hps.name.rsplit('/', maxsplit=1)[-1],
+            current_epoch=epoch
+        )
+    except Exception as ex:
+        logger.error(f"Error while sending epoch info: {ex}", exc_info=True)
 
     if epoch == 1:
         lowest_value = {"step": 0, "value": float("inf"), "epoch": 0}
@@ -619,13 +634,23 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
         else:
             ckpt = net_g.state_dict()
 
+        save_filename = "{}_{}e_{}s.pth".format(hps.name, epoch, global_step)
+
+        try:
+            rvc_service.add_model_info(
+                model_name=hps.name.rsplit('/', maxsplit=1)[-1],
+                pth_path=os.path.join("logs", save_filename)
+            )
+        except Exception as e:
+            print(f"Error adding model info: {e}")
+
         extract_model(
             ckpt,
             hps.sample_rate,
             hps.if_f0,
             hps.name,
             os.path.join(
-                hps.model_dir, "{}_{}e_{}s.pth".format(hps.name, epoch, global_step)
+                hps.model_dir, save_filename
             ),
             epoch,
             global_step,
@@ -633,6 +658,15 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, scaler, loaders, writers,
             hps,
         )
         sleep(1)
+
+        try:
+            rvc_service.send_model_info(
+                model_name=hps.name.rsplit('/', maxsplit=1)[-1],
+                model_status='READY'
+            )
+        except Exception as e:
+            logger.error(f"Error sending model info: {e}", exc_info=True)
+
         os._exit(2333333)
 
 

@@ -6,7 +6,6 @@
 *.onnx
 *.pth
 *.index
-*.bin
 
 # Ignore Python bytecode files
 *.pyc
@@ -29,4 +28,9 @@ venv/
 # Ignore specific project directories
 /tracks/
 /lyrics/
+control_api/.env
+.idea
+.vscode
 .env
+!/.vscode/
+!/.github/

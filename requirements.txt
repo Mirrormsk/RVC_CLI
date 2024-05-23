@@ -9,6 +9,12 @@ six>=1.16
 samplerate==0.1.0
 pyyaml
 ml_collections
+python-dotenv
+requests
+pika
+pydantic-settings
+boto3
+botocore
 
 #api reqs
 pydantic
