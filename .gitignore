@@ -32,5 +32,4 @@ control_api/.env
 .idea
 .vscode
 .env
-!/.vscode/
-!/.github/
+
