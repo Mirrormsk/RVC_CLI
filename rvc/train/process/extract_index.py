@@ -6,6 +6,8 @@ from sklearn.cluster import MiniBatchKMeans
 from multiprocessing import cpu_count
 from control_api.rvc_service import rvc_service
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+
 print("extract_index.py current work dir:", os.getcwd())
 
 exp_dir = sys.argv[1]
