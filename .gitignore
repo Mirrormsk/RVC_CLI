@@ -32,4 +32,6 @@ control_api/.env
 .idea
 .vscode
 .env
+rvc_service_warnings.log
+*.json
 
