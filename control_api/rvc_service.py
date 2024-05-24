@@ -16,7 +16,6 @@ from config import settings
 logger = logging.getLogger("rvc_service")
 logger.setLevel(logging.DEBUG)
 
-
 stream_handler = logging.StreamHandler()
 stream_handler.setLevel(logging.DEBUG)
 logger.addHandler(stream_handler)
@@ -43,9 +42,9 @@ class RVCService:
         self.s3_results_path = "received_from_rvc"
 
         for path in (
-            self.files_for_process_dir,
-            self.source_save_path,
-            self.results_path,
+                self.files_for_process_dir,
+                self.source_save_path,
+                self.results_path,
         ):
             if not os.path.exists(path):
                 os.makedirs(path)
@@ -55,7 +54,7 @@ class RVCService:
                 json.dump({}, file)
 
     def add_model_info(
-        self, model_name: str, pth_path: str = None, index_path: str = None
+            self, model_name: str, pth_path: str = None, index_path: str = None
     ):
         """Insert model info in json file"""
         print(f"Adding model info for {model_name}")
@@ -122,7 +121,7 @@ class RVCService:
                     break
 
     def download_model(
-        self, model_name: str, pth_file_s3_path: str, index_file_s3_path: str
+            self, model_name: str, pth_file_s3_path: str, index_file_s3_path: str
     ):
 
         pth_save_dir = self.logs_dir
@@ -151,7 +150,8 @@ class RVCService:
             logger.info(f"Successfully downloaded model data: {model_name}")
 
     def send_model_info(
-        self, model_name: str, model_status: str = None, current_epoch: int = None
+            self, model_name: str, model_status: str = None, current_epoch: int = None, pth_file: str = None,
+            index_file: str = None
     ) -> None:
         """Send model status to server"""
 
@@ -160,6 +160,8 @@ class RVCService:
             "model_name": model_name,
             "model_status": model_status,
             "current_epoch": current_epoch,
+            "pth_file": pth_file,
+            "index_file": index_file,
         }
 
         self.send_callback_data(data)
@@ -251,7 +253,7 @@ class RVCService:
         return return_code, stderr_output
 
     def prepare_source(
-        self, dataset_path: str, model_name: str, sampling_rate: int = 40000
+            self, dataset_path: str, model_name: str, sampling_rate: int = 40000
     ):
         command = [
             self.python_command,
@@ -267,12 +269,12 @@ class RVCService:
         return self._run_process(command)
 
     def run_extract_features_command(
-        self,
-        model_name: str,
-        rvc_version: str = "v2",
-        f0method: str = "rmvpe",
-        hop_length: int = 128,
-        sampling_rate: int = 40000,
+            self,
+            model_name: str,
+            rvc_version: str = "v2",
+            f0method: str = "rmvpe",
+            hop_length: int = 128,
+            sampling_rate: int = 40000,
     ):
         command = [
             self.python_command,
@@ -292,23 +294,23 @@ class RVCService:
         return self._run_process(command)
 
     def run_start_training_command(
-        self,
-        model_name: str,
-        batch_size: str,
-        rvc_version: str = "v2",
-        save_every_epoch: int = 50,
-        save_only_latest: bool = False,
-        save_every_weights: bool = True,
-        total_epoch: int = 1000,
-        sampling_rate: int = 40000,
-        gpu: int = 0,
-        pitch_guidance: bool = True,
-        overtraining_detector: bool = False,
-        overtraining_threshold: int = 50,
-        pretrained: bool = True,
-        custom_pretrained: bool = False,
-        g_pretrained: str = None,
-        d_pretrained: str = None,
+            self,
+            model_name: str,
+            batch_size: str,
+            rvc_version: str = "v2",
+            save_every_epoch: int = 50,
+            save_only_latest: bool = False,
+            save_every_weights: bool = True,
+            total_epoch: int = 1000,
+            sampling_rate: int = 40000,
+            gpu: int = 0,
+            pitch_guidance: bool = True,
+            overtraining_detector: bool = False,
+            overtraining_threshold: int = 50,
+            pretrained: bool = True,
+            custom_pretrained: bool = False,
+            g_pretrained: str = None,
+            d_pretrained: str = None,
     ):
         command = [
             self.python_command,
@@ -363,12 +365,12 @@ class RVCService:
         return self._run_process(command)
 
     def run_infer_command(
-        self,
-        input_path: str,
-        output_path: str,
-        pth_path: str,
-        index_path: str,
-        export_format: str = "WAV",
+            self,
+            input_path: str,
+            output_path: str,
+            pth_path: str,
+            index_path: str,
+            export_format: str = "WAV",
     ):
         command = [
             self.python_command,
@@ -458,16 +460,47 @@ class RVCService:
         else:
             logger.info("Generate index process succeeded")
 
+        try:
+            model_data = rvc_service.get_model_data(model_name)
+
+            pth_s3_path = f'rvc_models/{model_name}.pth'
+            index_s3_path = f'rvc_models/{model_name}.index'
+
+            pth_file = model_data.get("pth_path")
+            index_file = model_data.get("index_path")
+
+            if pth_file:
+                AWSService.upload_file_to_s3(
+                    model_data['pth_path'], pth_s3_path
+                )
+            else:
+                logger.error(f"Pth file is missing for model {model_name}")
+
+            if index_file:
+                AWSService.upload_file_to_s3(
+                    model_data['index_path'], index_s3_path
+                )
+            else:
+                logger.error(f"Index file is missing for model {model_name}. GPU not working?")
+
+            self.send_model_info(
+                model_name=model_name,
+                pth_file=pth_s3_path if pth_file else None,
+                index_file=index_s3_path if index_file else None,
+            )
+
+        except Exception as e:
+            logger.error(f"Can not upload model {model_name} to S3: {e}")
         logger.info(f"Training task finished! Listen for new messages")
 
     def run_infer(
-        self,
-        model_name: str,
-        file_aws_url: str,
-        file_id: int,
-        pth_file_s3_path: str,
-        index_file_s3_path: str,
-        export_format: str,
+            self,
+            model_name: str,
+            file_aws_url: str,
+            file_id: int,
+            pth_file_s3_path: str,
+            index_file_s3_path: str,
+            export_format: str,
     ):
         filename = file_aws_url.rsplit("/", maxsplit=1)[-1]
         full_path = os.path.join(self.files_for_process_dir, filename)
@@ -530,6 +563,5 @@ class RVCService:
 
 
 rvc_service = RVCService(source_save_path="sources", results_path="results")
-
 
 # python main.py infer --input_path 'files/rec20.wav' --output_path 'results/rec20.wav' --pth_path 'logs/guf-3.pth' --index_path 'logs/guf/added_IVF794_Flat_nprobe_1_guf-3_v2.index' --export_format 'OGG'
