@@ -25,6 +25,7 @@ from torch.utils.tensorboard import SummaryWriter
 import torch.distributed as dist
 import torch.multiprocessing as mp
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 from control_api.rvc_service import rvc_service
 
 
