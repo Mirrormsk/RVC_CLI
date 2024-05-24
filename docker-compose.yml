@@ -9,3 +9,5 @@ services:
     ports:
       - "5672:5672"
     restart: always
+    environment:
+      - PYTHONPATH=/app/
